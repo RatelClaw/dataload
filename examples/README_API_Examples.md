@@ -37,12 +37,12 @@ This will check for:
 Create a `.env` file or set these environment variables:
 
 ```bash
-# Database Configuration
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_NAME=vector_db
-export DB_USER=postgres
-export DB_PASSWORD=your_password
+# Database Configuration (used by dataload codebase)
+export LOCAL_POSTGRES_HOST=localhost
+export LOCAL_POSTGRES_PORT=5432
+export LOCAL_POSTGRES_DB=vector_db
+export LOCAL_POSTGRES_USER=postgres
+export LOCAL_POSTGRES_PASSWORD=your_password
 
 # Gemini API Key (required for embeddings)
 export GEMINI_API_KEY=your_gemini_api_key_here

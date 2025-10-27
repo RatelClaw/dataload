@@ -75,11 +75,11 @@ This demonstrates:
 
 ```bash
 # Database (required for full example)
-export DB_HOST=localhost
-export DB_PORT=5432
-export DB_NAME=vector_db
-export DB_USER=postgres
-export DB_PASSWORD=your_password
+export LOCAL_POSTGRES_HOST=localhost
+export LOCAL_POSTGRES_PORT=5432
+export LOCAL_POSTGRES_DB=vector_db
+export LOCAL_POSTGRES_USER=postgres
+export LOCAL_POSTGRES_PASSWORD=your_password
 
 # Embeddings (optional - uses mock if not provided)
 export GEMINI_API_KEY=your_gemini_api_key

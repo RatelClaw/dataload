@@ -72,7 +72,7 @@ def check_postgresql():
         return False
     
     # Check environment variables
-    db_vars = ['DB_HOST', 'DB_PORT', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']
+    db_vars = ['LOCAL_POSTGRES_HOST', 'LOCAL_POSTGRES_PORT', 'LOCAL_POSTGRES_DB', 'LOCAL_POSTGRES_USER', 'LOCAL_POSTGRES_PASSWORD']
     missing_vars = []
     
     for var in db_vars:
@@ -110,12 +110,12 @@ def create_env_file():
     """Create a sample .env file."""
     print("\n📝 Creating sample .env file...")
     
-    env_content = """# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=vector_db
-DB_USER=postgres
-DB_PASSWORD=your_password_here
+    env_content = """# Database Configuration (used by dataload codebase)
+LOCAL_POSTGRES_HOST=localhost
+LOCAL_POSTGRES_PORT=5432
+LOCAL_POSTGRES_DB=vector_db
+LOCAL_POSTGRES_USER=postgres
+LOCAL_POSTGRES_PASSWORD=your_password_here
 
 # Gemini API Configuration
 GEMINI_API_KEY=your_gemini_api_key_here
@@ -189,11 +189,11 @@ def run_test_connection():
         async def test_db():
             try:
                 conn = await asyncpg.connect(
-                    host=os.getenv('DB_HOST', 'localhost'),
-                    port=int(os.getenv('DB_PORT', 5432)),
-                    database=os.getenv('DB_NAME', 'vector_db'),
-                    user=os.getenv('DB_USER', 'postgres'),
-                    password=os.getenv('DB_PASSWORD', 'password')
+                    host=os.getenv('LOCAL_POSTGRES_HOST', 'localhost'),
+                    port=int(os.getenv('LOCAL_POSTGRES_PORT', 5432)),
+                    database=os.getenv('LOCAL_POSTGRES_DB', 'vector_db'),
+                    user=os.getenv('LOCAL_POSTGRES_USER', 'postgres'),
+                    password=os.getenv('LOCAL_POSTGRES_PASSWORD', 'password')
                 )
                 await conn.close()
                 print("✅ Database connection successful")

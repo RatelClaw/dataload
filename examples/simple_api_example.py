@@ -27,7 +27,8 @@ from dataload.infrastructure.storage.api_json_loader import APIJSONStorageLoader
 from dataload.application.use_cases.data_api_json_use_case import DataAPIJSONUseCase
 from dataload.infrastructure.db.postgres_data_move_repository import PostgresDataMoveRepository
 from dataload.infrastructure.db.db_connection import DBConnection
-from examples.mock_embedding_provider import MockEmbeddingProvider, GeminiEmbeddingProvider
+from dataload.application.services.embedding.gemini_provider import GeminiEmbeddingProvider
+from examples.mock_embedding_provider import MockEmbeddingProvider
 from dataload.config import logger
 
 
@@ -47,15 +48,12 @@ async def simple_api_to_vector_example():
     print("🚀 Simple API to Vector Example")
     print("=" * 50)
     
-    # Step 1: Setup database connection
+    # Step 1: Setup database connection (using environment variables)
     print("📊 Setting up database connection...")
-    db_connection = DBConnection(
-        host=os.getenv('DB_HOST', 'localhost'),
-        port=int(os.getenv('DB_PORT', 5432)),
-        database=os.getenv('DB_NAME', 'vector_db'),
-        user=os.getenv('DB_USER', 'postgres'),
-        password=os.getenv('DB_PASSWORD', 'password')
-    )
+    # DBConnection uses these environment variables:
+    # LOCAL_POSTGRES_HOST, LOCAL_POSTGRES_PORT, LOCAL_POSTGRES_DB, 
+    # LOCAL_POSTGRES_USER, LOCAL_POSTGRES_PASSWORD
+    db_connection = DBConnection()
     
     try:
         await db_connection.initialize()
@@ -66,21 +64,17 @@ async def simple_api_to_vector_example():
         gemini_api_key = os.getenv('GEMINI_API_KEY')
         
         if gemini_api_key:
-            # Use real Gemini if API key is available
+            # Use real Gemini embedding provider
             try:
-                import google.generativeai as genai
-                genai.configure(api_key=gemini_api_key)
-                # For this example, we'll use mock provider for simplicity
-                # You can implement real Gemini provider if needed
+                embedding_service = GeminiEmbeddingProvider()
+                print("✅ Gemini embedding provider initialized")
+            except Exception as e:
+                print(f"⚠️  Gemini provider failed ({e}), using mock provider")
                 embedding_service = MockEmbeddingProvider(embedding_dim=384)
-                print("✅ Using mock embedding provider (Gemini API key detected but using mock for demo)")
-            except ImportError:
-                embedding_service = MockEmbeddingProvider(embedding_dim=384)
-                print("✅ Using mock embedding provider (google-generativeai not installed)")
         else:
-            # Use mock embedding provider
+            # Use mock embedding provider for demonstration
             embedding_service = MockEmbeddingProvider(embedding_dim=384)
-            print("✅ Using mock embedding provider (no API key required)")
+            print("✅ Using mock embedding provider (set GEMINI_API_KEY for real embeddings)")
         
         # Step 3: Setup API loader and use case
         print("🔧 Setting up API loader...")
@@ -108,21 +102,21 @@ async def simple_api_to_vector_example():
             'flatten_nested': True,
             'separator': '_',
             
-            # Map API fields to cleaner database column names
+            # Create a comprehensive description using original field names (before mapping)
+            'update_request_body_mapping': {
+                'description': "concat({name}, ' - Color: ', coalesce({data_color}, 'N/A'), ', Capacity: ', coalesce({data_capacity}, 'N/A'))"
+            },
+            
+            # Map API fields to cleaner database column names (applied after transformations)
             'column_name_mapping': {
                 'id': 'device_id',
                 'name': 'device_name',
                 'data_color': 'color',
                 'data_capacity': 'capacity',
-                'data_capacity GB': 'capacity_gb',  # Handle space in field name
+                'data_capacity_gb': 'capacity_gb',  # This field exists in the data
                 'data_price': 'price',
                 'data_generation': 'generation',
                 'data_year': 'year'
-            },
-            
-            # Create a comprehensive description for better embeddings
-            'update_request_body_mapping': {
-                'description': "concat({device_name}, ' - Color: ', coalesce({color}, 'N/A'), ', Capacity: ', coalesce({capacity}, {capacity_gb}, 'N/A'))"
             }
         }
         

@@ -35,7 +35,8 @@ from dataload.infrastructure.storage.api_json_loader import APIJSONStorageLoader
 from dataload.application.use_cases.data_api_json_use_case import DataAPIJSONUseCase
 from dataload.infrastructure.db.postgres_data_move_repository import PostgresDataMoveRepository
 from dataload.infrastructure.db.db_connection import DBConnection
-from examples.mock_embedding_provider import MockEmbeddingProvider, GeminiEmbeddingProvider
+from dataload.application.services.embedding.gemini_provider import GeminiEmbeddingProvider
+from examples.mock_embedding_provider import MockEmbeddingProvider
 from dataload.config import logger
 
 
@@ -73,14 +74,9 @@ class ComprehensiveAPIVectorExample:
         
         # 1. Initialize database connection
         # Make sure you have these environment variables set:
-        # DATABASE_URL or individual DB settings
-        self.db_connection = DBConnection(
-            host=os.getenv('DB_HOST', 'localhost'),
-            port=int(os.getenv('DB_PORT', 5432)),
-            database=os.getenv('DB_NAME', 'vector_db'),
-            user=os.getenv('DB_USER', 'postgres'),
-            password=os.getenv('DB_PASSWORD', 'password')
-        )
+        # LOCAL_POSTGRES_HOST, LOCAL_POSTGRES_PORT, LOCAL_POSTGRES_DB,
+        # LOCAL_POSTGRES_USER, LOCAL_POSTGRES_PASSWORD
+        self.db_connection = DBConnection()
         
         # Initialize the connection pool
         await self.db_connection.initialize()
@@ -90,25 +86,22 @@ class ComprehensiveAPIVectorExample:
         self.repository = PostgresDataMoveRepository(self.db_connection)
         logger.info("✅ PostgreSQL repository created")
         
-        # 3. Initialize embedding provider
+        # 3. Initialize Gemini embedding provider
         gemini_api_key = os.getenv('GEMINI_API_KEY')
         
         if gemini_api_key:
             try:
-                # Try to use real Gemini if available
-                import google.generativeai as genai
-                genai.configure(api_key=gemini_api_key)
-                # For this example, we'll use mock provider for simplicity
-                # You can implement real Gemini provider if needed
+                # Use real Gemini embedding provider
+                self.embedding_service = GeminiEmbeddingProvider()
+                logger.info("✅ Gemini embedding provider initialized")
+            except Exception as e:
+                logger.warning(f"Gemini provider failed ({e}), using mock provider")
                 self.embedding_service = MockEmbeddingProvider(embedding_dim=768)
-                logger.info("✅ Mock embedding provider initialized (Gemini API key detected)")
-            except ImportError:
-                self.embedding_service = MockEmbeddingProvider(embedding_dim=768)
-                logger.info("✅ Mock embedding provider initialized (google-generativeai not installed)")
+                logger.info("✅ Mock embedding provider initialized (fallback)")
         else:
             # Use mock embedding provider for demonstration
             self.embedding_service = MockEmbeddingProvider(embedding_dim=768)
-            logger.info("✅ Mock embedding provider initialized (no API key required)")
+            logger.info("✅ Mock embedding provider initialized (set GEMINI_API_KEY for real embeddings)")
         
         # 4. Initialize API JSON loader with configuration
         self.api_loader = APIJSONStorageLoader(

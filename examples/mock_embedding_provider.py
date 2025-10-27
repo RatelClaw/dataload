@@ -76,12 +76,23 @@ class MockEmbeddingProvider(EmbeddingProviderInterface):
         embedding = []
         for i in range(self.embedding_dim):
             # Use different parts of the hash for each dimension
-            hash_segment = text_hash[(i * 2) % len(text_hash):(i * 2 + 8) % len(text_hash)]
-            if len(hash_segment) < 8:
-                hash_segment = (text_hash + text_hash)[i * 2:i * 2 + 8]
+            start_idx = (i * 2) % len(text_hash)
+            end_idx = min(start_idx + 8, len(text_hash))
+            hash_segment = text_hash[start_idx:end_idx]
+            
+            # Ensure we have at least some characters
+            if len(hash_segment) == 0:
+                hash_segment = text_hash[:8]
+            elif len(hash_segment) < 8:
+                # Pad with repeated hash if needed
+                hash_segment = (hash_segment + text_hash)[:8]
             
             # Convert hex to int and normalize to [-1, 1]
-            value = int(hash_segment, 16) / (16**8 / 2) - 1
+            try:
+                value = int(hash_segment, 16) / (16**8 / 2) - 1
+            except ValueError:
+                # Fallback if hex conversion fails
+                value = (hash(text + str(i)) % 1000) / 500.0 - 1
             
             # Add some variation based on position
             value += math.sin(i * 0.1) * 0.1
