@@ -12,7 +12,7 @@ import os
 from dataload.infrastructure.storage.api_json_loader import APIJSONStorageLoader
 
 
-def example_basic_json_loading():
+async def example_basic_json_loading():
     """Example: Basic JSON data loading from dict."""
     print("=== Basic JSON Loading Example ===")
     
@@ -51,8 +51,8 @@ def example_basic_json_loading():
     # Create loader
     loader = APIJSONStorageLoader()
     
-    # Load JSON data
-    df = loader.load_json(sample_data)
+    # Load JSON data (async call)
+    df = await loader.load_json(sample_data)
     
     print(f"Loaded {len(df)} rows with {len(df.columns)} columns")
     print("Columns:", list(df.columns))
@@ -61,7 +61,7 @@ def example_basic_json_loading():
     print()
 
 
-def example_json_file_loading():
+async def example_json_file_loading():
     """Example: Loading JSON from a file."""
     print("=== JSON File Loading Example ===")
     
@@ -81,8 +81,8 @@ def example_json_file_loading():
     try:
         loader = APIJSONStorageLoader()
         
-        # Load from file
-        df = loader.load_json(json_path)
+        # Load from file (async call)
+        df = await loader.load_json(json_path)
         
         print(f"Loaded from file: {len(df)} rows with {len(df.columns)} columns")
         print("Columns:", list(df.columns))
@@ -94,7 +94,7 @@ def example_json_file_loading():
         os.unlink(json_path)
 
 
-def example_column_mapping():
+async def example_column_mapping():
     """Example: Using column name mapping."""
     print("=== Column Mapping Example ===")
     
@@ -122,7 +122,7 @@ def example_column_mapping():
     }
     
     loader = APIJSONStorageLoader()
-    df = loader.load_json(data, config)
+    df = await loader.load_json(data, config)
     
     print("Original nested structure mapped to clean column names:")
     print("Columns:", list(df.columns))
@@ -131,7 +131,7 @@ def example_column_mapping():
     print()
 
 
-def example_data_transformations():
+async def example_data_transformations():
     """Example: Using data transformations."""
     print("=== Data Transformations Example ===")
     
@@ -150,7 +150,7 @@ def example_data_transformations():
     }
     
     loader = APIJSONStorageLoader()
-    df = loader.load_json(data, config)
+    df = await loader.load_json(data, config)
     
     print("Added computed fields:")
     print("Columns:", list(df.columns))
@@ -159,7 +159,7 @@ def example_data_transformations():
     print()
 
 
-def example_custom_flattening():
+async def example_custom_flattening():
     """Example: Custom JSON flattening options."""
     print("=== Custom Flattening Example ===")
     
@@ -186,7 +186,7 @@ def example_custom_flattening():
     }
     
     loader = APIJSONStorageLoader()
-    df = loader.load_json(data, config)
+    df = await loader.load_json(data, config)
     
     print("Custom flattening with __ separator and array joining:")
     print("Columns:", list(df.columns))
@@ -195,7 +195,7 @@ def example_custom_flattening():
     print()
 
 
-def example_complete_workflow():
+async def example_complete_workflow():
     """Example: Complete workflow with all features."""
     print("=== Complete Workflow Example ===")
     
@@ -243,7 +243,7 @@ def example_complete_workflow():
     }
     
     loader = APIJSONStorageLoader()
-    df = loader.load_json(data, config)
+    df = await loader.load_json(data, config)
     
     print("Complete workflow: flatten → transform → map")
     print("Final columns:", list(df.columns))
@@ -283,22 +283,22 @@ def example_csv_compatibility():
         os.unlink(csv_path)
 
 
-def main():
+async def main():
     """Run all examples."""
     print("APIJSONStorageLoader Examples")
     print("=" * 50)
     print()
     
-    example_basic_json_loading()
-    example_json_file_loading()
-    example_column_mapping()
-    example_data_transformations()
-    example_custom_flattening()
-    example_complete_workflow()
-    example_csv_compatibility()
+    await example_basic_json_loading()
+    await example_json_file_loading()
+    await example_column_mapping()
+    await example_data_transformations()
+    await example_custom_flattening()
+    await example_complete_workflow()
+    example_csv_compatibility()  # This one is synchronous (CSV loading)
     
     print("All examples completed successfully!")
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
