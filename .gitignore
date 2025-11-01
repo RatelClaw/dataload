@@ -11,6 +11,7 @@ load-env/
 env/
 venv/
 .venv/
+myenv/
 
 # IDE / Editor
 .idea/
@@ -22,5 +23,6 @@ Thumbs.db
 
 # Environment variables
 .env
-
+.kiro
+.Kiro
 dist/
