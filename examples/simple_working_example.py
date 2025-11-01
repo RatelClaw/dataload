@@ -22,36 +22,9 @@ from dataload.infrastructure.db.data_repository import PostgresDataRepository
 from dataload.infrastructure.storage.api_json_loader import APIJSONStorageLoader
 from dataload.interfaces.embedding_provider import EmbeddingProviderInterface
 from dataload.application.use_cases.data_loader_use_case import dataloadUseCase
-
-
-class SimpleEmbeddingProvider(EmbeddingProviderInterface):
-    """Simple embedding provider that works without API keys."""
-    
-    def get_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """Generate simple embeddings based on text characteristics."""
-        embeddings = []
-        for text in texts:
-            # Create a simple 384-dimensional embedding
-            embedding = []
-            text_lower = text.lower()
-            
-            for i in range(384):
-                if i < len(text_lower):
-                    # Use character values
-                    value = (ord(text_lower[i]) - 97) / 25.0  # Normalize a-z to 0-1
-                else:
-                    # Use text hash for remaining dimensions
-                    value = ((hash(text) + i) % 1000) / 1000.0
-                
-                # Convert to [-1, 1] range
-                value = (value * 2) - 1
-                embedding.append(value)
-            
-            embeddings.append(embedding)
-        
-        return embeddings
-
-
+from dataload.application.services.embedding.gemini_provider import (
+    GeminiEmbeddingProvider,
+)
 async def main():
     """
     Load API data using existing infrastructure with simple embeddings.
@@ -74,8 +47,8 @@ async def main():
     
     # Step 3: Initialize simple embedding provider (no API key needed)
     print("🤖 Initializing simple embedding provider...")
-    embedding = SimpleEmbeddingProvider()
-    
+    # embedding = SimpleEmbeddingProvider()
+    embedding = GeminiEmbeddingProvider()
     # Step 4: Initialize API loader
     print("🌐 Initializing API loader...")
     api_loader = APIJSONStorageLoader()

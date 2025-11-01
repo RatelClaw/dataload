@@ -23,7 +23,7 @@ from dataload.domain.api_entities import (
     APIConfig, AuthConfig, PaginationConfig, JSONProcessingConfig,
     ColumnMappingConfig, RequestTransformationConfig, APIJSONLoadResult,
     APIError, AuthenticationError, JSONParsingError, ColumnMappingError,
-    RequestTransformationError, AuthType, ValidationMode
+    RequestTransformationError, AuthType, ValidationMode, TransformationResult, MappingResult
 )
 from dataload.domain.entities import DBOperationError, DataMoveError
 from dataload.config import logger
