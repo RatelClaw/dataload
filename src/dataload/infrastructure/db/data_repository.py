@@ -10,6 +10,7 @@ from dataload.domain.entities import (
 )
 from dataload.infrastructure.db.db_connection import DBConnection
 from dataload.config import logger, DEFAULT_DIMENSION
+from dataload.embedding_config import VectorStoreConfig, create_vector_store_config
 from tenacity import retry, stop_after_attempt, wait_fixed
 import json
 
@@ -77,8 +78,20 @@ class PostgresDataRepository(DataRepositoryInterface):
         "is_active",
     ]
 
-    def __init__(self, db_connection: DBConnection):
+    def __init__(self, db_connection: DBConnection, config: Optional[Dict[str, any]] = None):
         self.db = db_connection
+        # Initialize configuration with defaults
+        self.config: VectorStoreConfig = create_vector_store_config("postgres", config)
+        logger.info(f"Initialized PostgresDataRepository with dimension: {self.config.dimension}, index_type: {self.config.index_type}")
+    
+    def _get_distance_operator(self, distance_metric: str) -> str:
+        """Get the appropriate distance operator for pgvector."""
+        operators = {
+            "cosine": "vector_cosine_ops",
+            "euclidean": "vector_l2_ops", 
+            "dot_product": "vector_ip_ops"
+        }
+        return operators.get(distance_metric, "vector_cosine_ops")
 
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     async def get_table_schema(self, table_name: str) -> TableSchema:
@@ -170,14 +183,14 @@ class PostgresDataRepository(DataRepositoryInterface):
         column_types["embed_columns_names"] = "jsonb"
         if embed_type == "combined":
             columns.append("embed_columns_value text")
-            columns.append(f"embeddings vector({DEFAULT_DIMENSION})")
+            columns.append(f"embeddings vector({self.config.dimension})")
             column_types["embed_columns_value"] = "text"
-            column_types["embeddings"] = f"vector({DEFAULT_DIMENSION})"
+            column_types["embeddings"] = f"vector({self.config.dimension})"
         elif embed_type == "separated":
             for col in embed_columns_names:
                 enc_col = f"{col}_enc"
-                columns.append(f'"{enc_col}" vector({DEFAULT_DIMENSION})')
-                column_types[enc_col] = f"vector({DEFAULT_DIMENSION})"
+                columns.append(f'"{enc_col}" vector({self.config.dimension})')
+                column_types[enc_col] = f"vector({self.config.dimension})"
         columns.append("is_active boolean DEFAULT true")
         column_types["is_active"] = "boolean"
         # Add primary key constraint
@@ -192,28 +205,43 @@ class PostgresDataRepository(DataRepositoryInterface):
                 async with conn.transaction():
                     await conn.execute(query)
 
-                    # --- CHANGE START: Switch to IVFFlat Index for high dimensions (e.g., 3072) ---
-                    # Determine vector columns to index
+                    # Create vector indexes based on configuration
                     if embed_type == "combined":
                         embed_cols = ["embeddings"]
-                        # We use 100 for 'lists' as a reasonable starting point for small datasets.
-                        # Recommended lists = num_rows / 1000 to 2000, but using a fixed number is simpler here.
-                        ivfflat_params = "WITH (lists = 100)"
                     else:
                         embed_cols = [f"{col}_enc" for col in embed_columns_names]
-                        # IVFFlat index parameters for separated embeddings.
-                        ivfflat_params = "WITH (lists = 10)"
 
                     for ec in embed_cols:
-                        # Use ivfflat instead of hnsw to avoid the 2000 dimension limit
-                        index_query = f"""
-                            CREATE INDEX IF NOT EXISTS idx_{table_name}_{ec} 
-                            ON {table_name} 
-                            USING ivfflat ("{ec}" vector_cosine_ops) 
-                            {ivfflat_params}
-                        """
+                        if self.config.index_type == "ivfflat":
+                            # Use IVFFlat index for high dimensions or when explicitly configured
+                            distance_op = self._get_distance_operator(self.config.distance_metric)
+                            index_query = f"""
+                                CREATE INDEX IF NOT EXISTS idx_{table_name}_{ec} 
+                                ON {table_name} 
+                                USING ivfflat ("{ec}" {distance_op}) 
+                                WITH (lists = {self.config.ivfflat_lists})
+                            """
+                        else:
+                            # Use HNSW index (limited to 2000 dimensions)
+                            if self.config.dimension > 2000:
+                                logger.warning(f"HNSW index doesn't support dimensions > 2000. Using IVFFlat instead.")
+                                distance_op = self._get_distance_operator(self.config.distance_metric)
+                                index_query = f"""
+                                    CREATE INDEX IF NOT EXISTS idx_{table_name}_{ec} 
+                                    ON {table_name} 
+                                    USING ivfflat ("{ec}" {distance_op}) 
+                                    WITH (lists = {self.config.ivfflat_lists})
+                                """
+                            else:
+                                distance_op = self._get_distance_operator(self.config.distance_metric)
+                                index_query = f"""
+                                    CREATE INDEX IF NOT EXISTS idx_{table_name}_{ec} 
+                                    ON {table_name} 
+                                    USING hnsw ("{ec}" {distance_op}) 
+                                    WITH (m = {self.config.hnsw_m}, ef_construction = {self.config.hnsw_ef_construction})
+                                """
+                        
                         await conn.execute(index_query)
-                    # --- CHANGE END ---
 
             return column_types
         except PostgresError as e:
@@ -300,7 +328,7 @@ class PostgresDataRepository(DataRepositoryInterface):
                 df_converted[col] = df_converted[col].apply(
                     lambda x: str(x) if pd.notnull(x) else None
                 )
-            elif pg_type == f"vector({DEFAULT_DIMENSION})":
+            elif pg_type.startswith("vector("):
                 df_converted[col] = df_converted[col].apply(
                     lambda x: [float(v) for v in x] if x is not None else None
                 )
@@ -388,7 +416,7 @@ class PostgresDataRepository(DataRepositoryInterface):
                 df_converted[col] = df_converted[col].apply(
                     lambda x: str(x) if pd.notnull(x) else None
                 )
-            elif pg_type == f"vector({DEFAULT_DIMENSION})":
+            elif pg_type.startswith("vector("):
                 df_converted[col] = df_converted[col].apply(
                     lambda x: [float(v) for v in x] if x is not None else None
                 )

@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import json
 import os
 
@@ -10,6 +10,7 @@ from dataload.domain.entities import (
     TableSchema,
 )
 from dataload.config import DEFAULT_DIMENSION, logger
+from dataload.embedding_config import VectorStoreConfig, create_vector_store_config
 
 
 class ChromaVectorStore(VectorStoreInterface):
@@ -22,7 +23,7 @@ class ChromaVectorStore(VectorStoreInterface):
         "is_active",
     ]
 
-    def __init__(self, mode: str = "persistent", path: str = "./chroma_db"):
+    def __init__(self, mode: str = "persistent", path: str = "./chroma_db", config: Optional[Dict[str, Any]] = None):
         """
         Initialize ChromaVectorStore.
         """
@@ -33,8 +34,12 @@ class ChromaVectorStore(VectorStoreInterface):
             raise DBOperationError(
                 "ChromaDB is not installed. Install with: pip install vector-dataloader[chroma]"
             )
+        
+        # Initialize configuration with defaults
+        self.config: VectorStoreConfig = create_vector_store_config("chroma", config)
+        
         self.mode = mode
-        self.path = path if mode == "persistent" else None
+        self.path = self.config.persist_directory or path if mode == "persistent" else None
         if self.mode == "persistent":
             self.client = chromadb.PersistentClient(
                 path=self.path, settings=Settings(allow_reset=True)
@@ -48,6 +53,8 @@ class ChromaVectorStore(VectorStoreInterface):
 
         if self.mode == "persistent":
             self._load_existing_collections()
+        
+        logger.info(f"Initialized ChromaVectorStore with dimension: {self.config.dimension}, mode: {self.mode}")
 
     def _load_existing_collections(self):
         """Load all existing collection objects from the persistent client."""
@@ -143,10 +150,10 @@ class ChromaVectorStore(VectorStoreInterface):
         column_types["embed_columns_names"] = "text[]"
         if embed_type == "combined":
             column_types["embed_columns_value"] = "text"
-            column_types["embeddings"] = f"vector({DEFAULT_DIMENSION})"
+            column_types["embeddings"] = f"vector({self.config.dimension})"
         else:
             for col in embed_columns_names:
-                column_types[f"{col}_enc"] = f"vector({DEFAULT_DIMENSION})"
+                column_types[f"{col}_enc"] = f"vector({self.config.dimension})"
         column_types["is_active"] = "boolean"
 
         self.schemas[table_name] = TableSchema(

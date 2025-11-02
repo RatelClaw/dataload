@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Note: New configuration system available in dataload.config.embedding_config
+
 # --- Environment Variables ---
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 SECRET_NAME = os.environ.get("SECRET_NAME", "postgres/db-credentials")

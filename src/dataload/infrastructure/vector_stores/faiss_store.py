@@ -6,6 +6,7 @@ import pandas as pd
 from dataload.interfaces.vector_store import VectorStoreInterface
 from dataload.domain.entities import DataValidationError, DBOperationError, TableSchema
 from dataload.config import DEFAULT_DIMENSION, logger
+from dataload.embedding_config import VectorStoreConfig, create_vector_store_config
 
 # --- Persistence Configuration ---
 FAISS_STORAGE_PATH = "./faiss_storage"
@@ -24,9 +25,13 @@ class FaissVectorStore(VectorStoreInterface):
         "is_active",
     ]
 
-    def __init__(self, persistence_path: str = FAISS_STORAGE_PATH):
+    def __init__(self, persistence_path: str = FAISS_STORAGE_PATH, config: Optional[Dict[str, Any]] = None):
         """Initialize FAISS Vector Store with lazy imports and persistence setup."""
         self.faiss_module = self._lazy_import_faiss()
+        
+        # Initialize configuration with defaults
+        self.config: VectorStoreConfig = create_vector_store_config("faiss", config)
+        
         self.persistence_path = persistence_path
 
         # Internal in-memory structures
@@ -38,6 +43,8 @@ class FaissVectorStore(VectorStoreInterface):
 
         os.makedirs(self.persistence_path, exist_ok=True)
         self._load_all_data()
+        
+        logger.info(f"Initialized FaissVectorStore with dimension: {self.config.dimension}, index_type: {self.config.faiss_index_type}")
 
     # --------------------------------------------------------------------------
     # Utility / Lazy Import Helpers
@@ -239,14 +246,25 @@ class FaissVectorStore(VectorStoreInterface):
 
         if embed_type == "combined":
             column_types["embed_columns_value"] = "text"
-            column_types["embeddings"] = f"vector({DEFAULT_DIMENSION})"
-            self.indexes[table_name] = faiss.IndexFlatL2(DEFAULT_DIMENSION)
+            column_types["embeddings"] = f"vector({self.config.dimension})"
+            
+            # Create FAISS index based on configuration
+            if self.config.faiss_index_type == "IndexFlatIP":
+                self.indexes[table_name] = faiss.IndexFlatIP(self.config.dimension)
+            else:
+                self.indexes[table_name] = faiss.IndexFlatL2(self.config.dimension)
         else:
             for col in embed_columns_names:
                 col_enc = f"{col}_enc"
-                column_types[col_enc] = f"vector({DEFAULT_DIMENSION})"
+                column_types[col_enc] = f"vector({self.config.dimension})"
                 index_key = f"{table_name}_{col_enc}"
-                self.enc_indexes[index_key] = faiss.IndexFlatL2(DEFAULT_DIMENSION)
+                
+                # Create FAISS index based on configuration
+                if self.config.faiss_index_type == "IndexFlatIP":
+                    self.enc_indexes[index_key] = faiss.IndexFlatIP(self.config.dimension)
+                else:
+                    self.enc_indexes[index_key] = faiss.IndexFlatL2(self.config.dimension)
+                    
                 self.table_map[index_key] = table_name
 
         self.schemas[table_name] = TableSchema(
