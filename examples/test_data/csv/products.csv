@@ -1,0 +1,9 @@
+product_id,name,description,category,price,in_stock,rating,reviews_count
+1,Wireless Headphones Pro,Premium noise-canceling wireless headphones with 30-hour battery life and superior sound quality,Electronics,299.99,True,4.5,1250
+2,Smart Fitness Watch,"Advanced fitness tracker with heart rate monitoring, GPS, and sleep tracking capabilities",Wearables,249.99,True,4.3,890
+3,Laptop Computer 15inch,"High-performance laptop with Intel i7 processor, 16GB RAM, and 512GB SSD for professional use",Computers,1299.99,True,4.7,2340
+4,Portable Bluetooth Speaker,"Waterproof portable speaker with 360-degree sound, 20-hour battery, and wireless charging",Electronics,149.99,False,4.6,567
+5,Ergonomic Office Chair,"Ergonomic mesh office chair with lumbar support, adjustable armrests, and premium comfort",Furniture,449.99,True,4.4,423
+6,Standing Desk Electric,Electric height-adjustable standing desk with memory presets and cable management system,Furniture,699.99,True,4.8,789
+7,4K Webcam HD,"4K ultra HD webcam with auto-focus, noise-canceling microphone, and premium glass lens",Electronics,179.99,True,4.2,234
+8,Mechanical Keyboard RGB,"Mechanical gaming keyboard with RGB backlighting, hot-swappable switches, and aluminum frame",Electronics,159.99,True,4.5,1123

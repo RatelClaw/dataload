@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "name": "Product A",
+    "features": [
+      "feature1",
+      "feature2",
+      "feature3"
+    ],
+    "ratings": [
+      4.5,
+      4.7,
+      4.3,
+      4.8
+    ],
+    "reviews": [
+      {
+        "user": "user1",
+        "rating": 5
+      },
+      {
+        "user": "user2",
+        "rating": 4
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Product B",
+    "features": [
+      "feature1",
+      "feature4"
+    ],
+    "ratings": [
+      4.2,
+      4.1,
+      4.5
+    ],
+    "reviews": [
+      {
+        "user": "user3",
+        "rating": 4
+      }
+    ]
+  }
+]

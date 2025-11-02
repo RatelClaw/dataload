@@ -1,0 +1,5 @@
+user_id,user_profile_first_name,user_profile_last_name,user_contact_email,user_contact_phone,user_preferences_theme,user_preferences_language
+1,Alice,Johnson,alice@test.com,+1-555-0101,dark,en
+2,Bob,Smith,bob@test.com,+1-555-0102,light,es
+3,Charlie,Brown,charlie@test.com,+1-555-0103,dark,en
+4,Diana,Prince,diana@test.com,+1-555-0104,light,fr
