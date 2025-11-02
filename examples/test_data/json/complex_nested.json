@@ -1,0 +1,44 @@
+{
+  "company": {
+    "name": "Tech Corp",
+    "employees": [
+      {
+        "id": 1,
+        "personal": {
+          "name": "Alice Johnson",
+          "contact": {
+            "email": "alice@techcorp.com",
+            "phones": [
+              "+1-555-0101",
+              "+1-555-0102"
+            ]
+          }
+        },
+        "employment": {
+          "position": "Senior Engineer",
+          "department": "Engineering",
+          "salary": 120000,
+          "start_date": "2020-01-15"
+        }
+      },
+      {
+        "id": 2,
+        "personal": {
+          "name": "Bob Smith",
+          "contact": {
+            "email": "bob@techcorp.com",
+            "phones": [
+              "+1-555-0201"
+            ]
+          }
+        },
+        "employment": {
+          "position": "Product Manager",
+          "department": "Product",
+          "salary": 110000,
+          "start_date": "2021-03-20"
+        }
+      }
+    ]
+  }
+}

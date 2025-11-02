@@ -1,6 +1,6 @@
 [project]
 name = "vector-dataloader"
-version = "1.2.6"
+version = "1.2.7"
 description = "Production-grade embedding loader for CSV data to vector stores with multiple providers."
 authors = [
 { name = "Shashwat Roy", email = "shashwatunf@gmail.com" }

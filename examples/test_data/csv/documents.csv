@@ -1,0 +1,11 @@
+doc_id,title,content,category,author,publish_date,word_count
+1,Introduction to Machine Learning,"Machine learning is a subset of artificial intelligence that focuses on building systems that learn from data. This guide covers supervised learning, unsupervised learning, and neural networks.",AI/ML,Dr. Sarah Chen,2024-01-15,850
+2,Advanced Python Programming Techniques,"Advanced Python programming covers decorators, generators, context managers, metaclasses, and asynchronous programming patterns for building robust applications.",Programming,John Martinez,2024-02-20,1200
+3,Database Design Best Practices,"Database design involves normalization, indexing strategies, query optimization, and choosing the right database type for your application needs.",Database,Emily Rodriguez,2024-03-10,950
+4,Cloud Computing Architecture Patterns,"Cloud computing architecture patterns include microservices, serverless, container orchestration, and distributed system design principles.",Cloud,Michael Kim,2024-04-05,1100
+5,Microservices Design Principles,"Microservices architecture breaks down applications into small, independent services that communicate via APIs, enabling scalability and maintainability.",Architecture,Jessica Taylor,2024-05-12,1050
+6,RESTful API Development Guide,"RESTful APIs follow architectural constraints including statelessness, client-server separation, cacheability, and uniform interface design.",API,David Brown,2024-06-08,900
+7,DevOps and CI/CD Pipeline,"DevOps practices combine development and operations, focusing on automation, continuous integration, continuous deployment, and monitoring.",DevOps,Lisa Anderson,2024-07-22,1150
+8,Data Science with Python,"Data science involves statistical analysis, data visualization, machine learning, and extracting insights from large datasets using Python.",Data Science,Robert Lee,2024-08-15,1300
+9,Web Application Security,"Web security covers authentication, authorization, encryption, SQL injection prevention, XSS protection, and CSRF mitigation.",Security,Maria Garcia,2024-09-03,1000
+10,Scalable System Design,"Scalable system design addresses load balancing, caching strategies, database sharding, message queues, and fault tolerance.",Architecture,James Wilson,2024-10-11,1250

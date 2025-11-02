@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "username": "alice_j",
+    "profile": {
+      "first_name": "Alice",
+      "last_name": "Johnson",
+      "age": 28,
+      "bio": "Software engineer passionate about ML"
+    },
+    "contact": {
+      "email": "alice@example.com",
+      "phone": "+1-555-0101",
+      "address": {
+        "city": "San Francisco",
+        "state": "CA",
+        "zip": "94105"
+      }
+    },
+    "preferences": {
+      "notifications": true,
+      "newsletter": true,
+      "theme": "dark"
+    }
+  },
+  {
+    "id": 2,
+    "username": "bob_smith",
+    "profile": {
+      "first_name": "Bob",
+      "last_name": "Smith",
+      "age": 35,
+      "bio": "Data scientist and AI researcher"
+    },
+    "contact": {
+      "email": "bob@example.com",
+      "phone": "+1-555-0102",
+      "address": {
+        "city": "New York",
+        "state": "NY",
+        "zip": "10001"
+      }
+    },
+    "preferences": {
+      "notifications": false,
+      "newsletter": true,
+      "theme": "light"
+    }
+  }
+]

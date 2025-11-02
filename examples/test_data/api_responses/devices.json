@@ -1,0 +1,52 @@
+[
+  {
+    "id": "1",
+    "name": "Google Pixel 6 Pro",
+    "data": {
+      "color": "Cloudy White",
+      "capacity": "128 GB",
+      "price": 899.99,
+      "year": 2021
+    }
+  },
+  {
+    "id": "2",
+    "name": "Apple iPhone 12 Mini",
+    "data": {
+      "color": "Blue",
+      "capacity": "256 GB",
+      "price": 699.99,
+      "year": 2020
+    }
+  },
+  {
+    "id": "3",
+    "name": "Samsung Galaxy S21",
+    "data": {
+      "color": "Phantom Gray",
+      "capacity": "128 GB",
+      "price": 799.99,
+      "year": 2021
+    }
+  },
+  {
+    "id": "4",
+    "name": "Apple iPhone 13 Pro Max",
+    "data": {
+      "color": "Graphite",
+      "capacity": "512 GB",
+      "price": 1199.99,
+      "year": 2021
+    }
+  },
+  {
+    "id": "5",
+    "name": "Google Pixel 7",
+    "data": {
+      "color": "Obsidian",
+      "capacity": "256 GB",
+      "price": 599.99,
+      "year": 2022
+    }
+  }
+]
