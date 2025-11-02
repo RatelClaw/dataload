@@ -31,6 +31,9 @@ from dataload.interfaces.embedding_provider import EmbeddingProviderInterface
 class SimpleMockProvider(EmbeddingProviderInterface):
     def __init__(self, embedding_dim: int = 768):
         self.embedding_dim = embedding_dim
+
+    def get_dimension(self) -> int:
+        return self.embedding_dim
     
     def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         import hashlib
@@ -41,6 +44,77 @@ class SimpleMockProvider(EmbeddingProviderInterface):
             embeddings.append(embedding)
         return embeddings
 
+
+
+
+
+# ==================== CONFIGURATION EXAMPLES ====================
+
+def get_embedding_configs():
+    """Define custom configurations for each embedding provider."""
+    return {
+        'gemini': {
+            'model': 'text-embedding-004',
+            'dimension': 768,
+            'task_type': 'SEMANTIC_SIMILARITY'
+        },
+        'sentence_transformers': {
+            'model_name': 'sentence-transformers/all-mpnet-base-v2',
+            'dimension': 768,  # Using larger model for better quality
+            'device': 'cpu',
+            'normalize_embeddings': True
+        },
+        'bedrock': {
+            'model_id': 'amazon.titan-embed-text-v2:0',
+            'dimension': 1024,
+            'region': 'us-east-1',
+            'content_type': 'application/json'
+        },
+        'openai': {
+            'model': 'text-embedding-3-large',
+            'dimension': 3072  # Using large model for maximum quality
+        },
+        'mock_small': {
+            'dimension': 384,
+            'model_name': 'mock-small-model'
+        },
+        'mock_large': {
+            'dimension': 1536,
+            'model_name': 'mock-large-model'
+        }
+    }
+
+
+def get_vector_store_configs():
+    """Define custom configurations for vector stores matching embedding dimensions."""
+    return {
+        'postgres_768': {
+            'dimension': 768,
+            'index_type': 'hnsw',  # Use HNSW for better performance with 768 dims
+            'distance_metric': 'cosine',
+            'hnsw_m': 32,
+            'hnsw_ef_construction': 128
+        },
+        'postgres_1024': {
+            'dimension': 1024,
+            'index_type': 'ivfflat',  # Use IVFFlat for 1024 dims
+            'distance_metric': 'cosine',
+            'ivfflat_lists': 100
+        },
+        'postgres_3072': {
+            'dimension': 3072,
+            'index_type': 'ivfflat',  # Must use IVFFlat for high dimensions
+            'distance_metric': 'cosine',
+            'ivfflat_lists': 200
+        },
+        'postgres_384': {
+            'dimension': 384,
+            'index_type': 'hnsw',  # HNSW works well for smaller dimensions
+            'distance_metric': 'cosine',
+            'hnsw_m': 16,
+            'hnsw_ef_construction': 64
+        }
+    }
 
 # ==================== FEATURE 3.1: PostgreSQL Vector Store ====================
 
@@ -59,11 +133,23 @@ async def feature_3_1_postgres_vector_store():
     
     db_conn = None
     try:
-        # Initialize (from main_pg_gemni.py)
+        emb_configs = get_embedding_configs()
+        vec_configs = get_vector_store_configs()
+        
+        gemini_config = emb_configs['gemini']
+        postgres_config = vec_configs['postgres_768']
+        
+        print(f"🔧 Embedding Config: {gemini_config}")
+        print(f"🔧 Vector Store Config: {postgres_config}")
+        # 1. Database connection
+
+        # Database connection
         db_conn = DBConnection()
         await db_conn.initialize()
-        repo = PostgresDataRepository(db_conn)
-        
+        # 2. Repository: INJECT the explicit 768-dim config
+        repo = PostgresDataRepository(db_conn, config=postgres_config)
+        print("✅ Database connected")
+
         embedding = SimpleMockProvider(768)
         loader = LocalLoader()
         use_case = dataloadUseCase(repo, embedding, loader)

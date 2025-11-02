@@ -25,7 +25,7 @@ Prerequisites:
 import asyncio
 import os
 import sys
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, Union
 
 # Ensure src directory is in path
 src_path = os.path.join(os.path.dirname(__file__), '..', 'src')
@@ -71,7 +71,7 @@ except ImportError:
 class SimpleMockProvider(EmbeddingProviderInterface):
     """Mock provider for testing without API keys."""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Union[Dict[str, Any], None] = None):
         config = config or {}
         self.embedding_dim = config.get('dimension', 384)
         self.model_name = config.get('model_name', 'mock-model')
